@@ -17,7 +17,7 @@ Y = [y1, y2];
 
 
 %% Canonical information analysis
-[micv1,micv2,A_cia, B_cia, mi, I, Inorm, cca_out, stats_cia]  = micanon(X,Y,'method','simanneal_wrapper','numcomp',1,'spherical',false);
+[micv1,micv2,A_cia, B_cia, mi, I, Inorm, cca_out, stats_cia]  = micanon(X,Y,'method','fminsearch_wrapper','numcomp',1,'spherical',false);
 
 % Also try with one of the other 'method's:
 % 'fminsearch_wrapper','bfgs_wrapper','simanneal_wrapper','genetic_wrapper'
