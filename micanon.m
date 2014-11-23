@@ -252,7 +252,7 @@ if args.presphere
 end
 
 % Prepare other output
-if ~isempty(history.x)
+if ~isempty(history.x) && args.spherical
     history.x = [hypersph2cart(1, history.x(:,1:nvar)), ...
                 hypersph2cart(1, history.x(:,nvar+1:end))];
 end
@@ -347,27 +347,7 @@ function [y, grad] = maxMIs(x, nvar1,X, Y, varargin)
     end
     y = -fval;
 
-    
-        
-%         % Find components that at the same time minimize MI with previous
-%         % components
-% warning('Higher order components not implemented for gradients');
-%         for j = 1:args.p-1
-%             v1j = args.V1(:,j);
-%             cv1j = X*v1j;
-%             I1j = kdeMI(CV1,cv1j,'bandwidth',args.bandwidth);
-%             
-%             fval = fval-I1j;
-%         end
-%         for j = 1:args.p-1
-%             v2j = args.V2(:,j);
-%             cv2j = Y*v2j;
-%             I2j = kdeMI(CV2,cv2j,'bandwidth',args.bandwidth);
-%             fval = fval - I2j;
-%         end
-%     end
-    
-    
+      
     
 
 end
@@ -407,6 +387,8 @@ function [xval,fval,funevals] = fminsearch_wrapper(fun,xstart,args)
     options.PlotFcns = args.PlotFcns;
     options.TolFun = 1e-4;
     options.TolX = 1e-4;
+%     options.MaxIter = 300;
+%     warning('Setting max. iterations to 300!');
     [xval, fval,exitflag,options] = fminsearch(fun, xstart,options);
     funevals = options.funcCount;
 end

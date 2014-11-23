@@ -49,8 +49,7 @@ pdf = zeros(nbins,1);   % PDF at m_hash
 mhash = floor(Sc./dbins)+1;   % Calculate mhash for all points
 assert(sum(mhash==0)==0,'Bin with value 0 should be empty');
 assert(sum(mhash==nbins)==0,'Bin with value nbins should be empty');
-% mhash(mhash<1) = 1;         % Ensure it is between 1 and nbins-1
-% mhash(mhash>nbins-1) = nbins-1;
+
 eta = Sc./dbins - mhash + 1;    % Distance to index
 h = 1 - eta;                % Linear interpolation function
 
@@ -65,7 +64,8 @@ t = dbins/2:dbins:tmax;     % Distance to center
 Lt = length(t);
 t = [-fliplr(t) t(2:end)];  % Mirror Gaussian
 G = exp(-t.^2/2/sigma.^2);  % Gaussian
-G = G/(sum(G)*dbins*N);     % Normalize
+
+G = G/(sum(G)*N);     % Normalize
 dG = -(1/sigma^2).*t.*G;    % First-order Gaussian derivative
 
 % Convolve PDF/histogram/uniform sampling with Gaussian
