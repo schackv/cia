@@ -1,5 +1,4 @@
 # cia
-===
 
 Canonical information analysis
 
