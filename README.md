@@ -1,6 +1,6 @@
 # cia
 
-Canonical information analysis
+<span style="font-variant: small-caps">MATLAB</span> code for Canonical information analysis
 
 * Two-decomposition maximizing mutual information 
 * Uses fast approximate entropy estimation
