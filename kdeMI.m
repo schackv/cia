@@ -13,7 +13,7 @@ function [I, dI, Inorm, Hxy, Hx, Hy, bandwidth] = kdeMI(x, y, varargin)
 %       Inorm   Normed mutual information 2*I(x,y)/(H(x) + H(y)) also known
 %               as redundancy
  
-args = struct('fastentropy',true,'usegradient',false,'bandwidth','MSP','nbins',128);
+args = struct('fastentropy',true,'usegradient',false,'bandwidth','MSP','entropy','shannon','nbins',128);
 args = parseArgs(varargin,args);
 
 x = x(:);
@@ -48,41 +48,38 @@ else
     fun2d = @(x,y,bandwidth)slowentropy2d(x,y,diag(bandwidth.^2));
 end
 
-if ~args.usegradient
-    Hx = feval(fun1d,x,bandwidth.x);
-    Hy = feval(fun1d,y,bandwidth.y);
-    Hxy = feval(fun2d,x,y,bandwidth.xy);
-    dI = [];
-else
-    [Hx,dHx] = feval(fun1d,x,bandwidth.x);
-    [Hy,dHy] = feval(fun1d,y,bandwidth.y);
-    [Hxy,dHxy] = feval(fun2d,x,y,bandwidth.xy);
-    dI = [dHx dHy]-dHxy;     % [dIdx dIdy]
-end
+switch args.entropy
+    case 'shannon'
+        if ~args.usegradient
+            Hx = feval(fun1d,x,bandwidth.x);
+            Hy = feval(fun1d,y,bandwidth.y);
+            Hxy = feval(fun2d,x,y,bandwidth.xy);
+            dI = [];
+        else
+            [Hx,dHx] = feval(fun1d,x,bandwidth.x);
+            [Hy,dHy] = feval(fun1d,y,bandwidth.y);
+            [Hxy,dHxy] = feval(fun2d,x,y,bandwidth.xy);
+            dI = [dHx dHy]-dHxy;     % [dIdx dIdy]
+        end
 
-% dI = [];
-% if args.fastentropy
-%     % Calculate entropies using Gaussian KDE in O(NlogN)
-%     Hx = fastentropy1d(x, bandwidth.x);
-%     Hy = fastentropy1d(y, bandwidth.y);
-%     Hxy = fastentropy2d([x y], bandwidth.xy);
-% else
-%     % Calculate entropy by pairwise distances
-%     Hx  = slowentropy1d(x, bandwidth.x);
-%     Hy  = slowentropy1d(y, bandwidth.y);
-%     Hxy = slowentropy2d(x,y, diag(bandwidth.xy.^2));
-% end
 
-% Calculate MI
-I = Hx+Hy-Hxy;
-if nargout>2
-%     Inorm = normed_differential_mi(length(x),Hx,Hy,Hxy,[min(x),max(x)],[min(y),max(y)],args.nbins);
-    Hxx = feval(fun2d,x,x,[bandwidth.x bandwidth.x]);
-    Hyy = feval(fun2d,y,y,[bandwidth.y bandwidth.y]);
-%     Inorm = 2*(Hx+Hy-Hxy)/(Hx+Hy );
-%     Inorm = (Hx+Hy-Hxy)/(Hx+Hy - 0.5*(Hxx+Hyy) );
-%     Inorm = (Hx+Hy-Hxy)/(sqrt(2*Hx-Hxx)*sqrt(2*Hy-Hyy));
-    Inorm = I/Hxy;
+        % Calculate MI
+        I = Hx+Hy-Hxy;
+        if nargout>2
+            Hxx = feval(fun2d,x,x,[bandwidth.x bandwidth.x]);
+            Hyy = feval(fun2d,y,y,[bandwidth.y bandwidth.y]);
+            Inorm = I/Hxy;
+        end
+    case 'renyi'
+        if args.usegradient
+            error('cia:NotImplemented','Gradient calculation not implemented for Renyi entropy.');
+        end
+        [~,~,px] = feval(fun1d,x,bandwidth.x);
+        [~,~,py] = feval(fun1d,y,bandwidth.y);
+        [~,~,pxy] = feval(fun2d,x,y,bandwidth.xy);
+        N = length(x);
+        I = log(N) + log(sum(pxy)) - log(sum(px)) - log(sum(py));
+        dI = [];
 end
 
 
