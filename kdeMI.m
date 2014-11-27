@@ -78,7 +78,7 @@ switch args.entropy
         [~,~,py] = feval(fun1d,y,bandwidth.y);
         [~,~,pxy] = feval(fun2d,x,y,bandwidth.xy);
         N = length(x);
-        I = log(N) + log(sum(pxy)) - log(sum(px)) - log(sum(py));
+        I = -log(N) + log(sum(pxy./px./py));
         dI = [];
 end
 
