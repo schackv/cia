@@ -1,4 +1,4 @@
-function [H,dH,p] = fastentropy1d(S,sigma,nbins)
+function [p,H,dH] = fastentropy1d(S,sigma,nbins)
 % FASTENTROPY1d Calculate marginal entropy estimate of univariate signal
 % using a Gaussian kernel density estimator.
 %
@@ -8,8 +8,9 @@ function [H,dH,p] = fastentropy1d(S,sigma,nbins)
 %       nbins   (optional) The number of bins used for uniform sampling.
 %               Default = 256.
 % Outputs
+%       p       Sample probabilities
 %       H       Entropy estimate
-%
+%       dH      Entropy gradient
 
 % Reference: 
 % Shwartz et al, Fast kernel entropy estimation and optimization, 
@@ -75,9 +76,11 @@ pdf_g = temp(Lt + (0:nbins-1));   % Extract non-padded part
 
 % Interpolate to original grid and estimate entropy
 p = h .* pdf_g(mhash) + (1-h) .* pdf_g(mhash + 1);
-H = -1/N * sum(log(p));
-
 if nargout>1
+    H = -1/N * sum(log(p));
+end
+
+if nargout>2
     % Entropy  gradient
     temp    = conv(pdf,dG);
     temp    = temp(:);

@@ -1,4 +1,4 @@
-function [H,dH,p] = fastentropy2d(S,sigma,nbins)
+function [p,H,dH] = fastentropy2d(S,sigma,nbins)
 % FASTENTROPY2d Calculate joint entropy for a two dimensional sample using
 % a Gaussian kernel density estimator. Needs a given estimate of the 
 % kernel bandwidth and optionally the number of bins used for 
@@ -14,8 +14,9 @@ function [H,dH,p] = fastentropy2d(S,sigma,nbins)
 %   nbins   (optional) Number of bins used for uniform sampling. 
 %
 % Outputs
+%   p       Sample probability estimate
 %   H       Joint entropy estimate.
-%
+%   dH      Entropy gradient estimate
 
 % This is a generalization to joint entropy from the marginal entropy
 % calculation suggested by Shwartz et al in:
@@ -98,9 +99,11 @@ p =    (1-eta(:,1)).*(1-eta(:,2)) .* pdf_g(linind) ...
           + (1-eta(:,1)).*eta(:,2)     .* pdf_g(linind3) ...
           + eta(:,1).*eta(:,2)         .* pdf_g(linind4);
 
-H = - 1/N * sum(log(p+eps));
-
 if nargout>1
+    H = - 1/N * sum(log(p+eps));
+end
+
+if nargout>2
     % Joint entropy gradient 
     dG  = -bsxfun(@times,diag(1./sigma.^2)*[T1(:) T2(:)]', G(:)');
     dG  = reshape(dG',[size(T1), 2]);     % dx, dy
