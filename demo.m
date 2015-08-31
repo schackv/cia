@@ -25,6 +25,10 @@ Y = [y1, y2];
 % Or try with Renyi entropy instead of Shannon entropy
 % [micv1,micv2,A_cia, B_cia, mi, I, Inorm, cca_out, stats_cia]  = micanon(X,Y,'entropy','renyi');
 
+% Or try with multiple components (with multiple starting points, here
+% random vectors
+% [micv1,micv2,A_cia, B_cia, mi, I, Inorm, cca_out, stats_cia]  = micanon(X,Y,'method','fminsearch_wrapper','numcomp',3,'spherical',true, 'x0', rand(4,3));
+
 %% Show scatter plots for the first set for each method
 figure;
 subplot 121;
