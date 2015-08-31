@@ -51,14 +51,14 @@ end
 switch args.entropy
     case 'shannon'
         if ~args.usegradient
-            Hx = feval(fun1d,x,bandwidth.x);
-            Hy = feval(fun1d,y,bandwidth.y);
-            Hxy = feval(fun2d,x,y,bandwidth.xy);
+            [~,Hx] = feval(fun1d,x,bandwidth.x);
+            [~,Hy] = feval(fun1d,y,bandwidth.y);
+            [~,Hxy] = feval(fun2d,x,y,bandwidth.xy);
             dI = [];
         else
-            [Hx,dHx] = feval(fun1d,x,bandwidth.x);
-            [Hy,dHy] = feval(fun1d,y,bandwidth.y);
-            [Hxy,dHxy] = feval(fun2d,x,y,bandwidth.xy);
+            [~,Hx,dHx] = feval(fun1d,x,bandwidth.x);
+            [~,Hy,dHy] = feval(fun1d,y,bandwidth.y);
+            [~,Hxy,dHxy] = feval(fun2d,x,y,bandwidth.xy);
             dI = [dHx dHy]-dHxy;     % [dIdx dIdy]
         end
 
@@ -66,17 +66,17 @@ switch args.entropy
         % Calculate MI
         I = Hx+Hy-Hxy;
         if nargout>2
-            Hxx = feval(fun2d,x,x,[bandwidth.x bandwidth.x]);
-            Hyy = feval(fun2d,y,y,[bandwidth.y bandwidth.y]);
+            [~,Hxx] = feval(fun2d,x,x,[bandwidth.x bandwidth.x]);
+            [~,Hyy] = feval(fun2d,y,y,[bandwidth.y bandwidth.y]);
             Inorm = I/Hxy;
         end
     case 'renyi'
         if args.usegradient
             error('cia:NotImplemented','Gradient calculation not implemented for Renyi entropy.');
         end
-        [~,~,px] = feval(fun1d,x,bandwidth.x);
-        [~,~,py] = feval(fun1d,y,bandwidth.y);
-        [~,~,pxy] = feval(fun2d,x,y,bandwidth.xy);
+        px = feval(fun1d,x,bandwidth.x);
+        py = feval(fun1d,y,bandwidth.y);
+        pxy = feval(fun2d,x,y,bandwidth.xy);
         N = length(x);
         I = -log(N) + log(sum(pxy./px./py));
         dI = [];
