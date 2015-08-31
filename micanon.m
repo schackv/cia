@@ -4,10 +4,8 @@ function [micv1,micv2,V1,V2, mi, I, Inorm, cca_out, optim_out] =  micanon(X,Y,va
 % two linear combinations U = a^T X and V = b^T Y
 % This is useful for data sets where e.g. correlation does not make sense
 % as a measure for similarity.
-% Only the leading pair of mutual information canonical variates (MICV) is
-% determined.
 % 
-% The data is sphered prior to analysis.
+% The data can be sphered prior to analysis (see input arguments below)
 %
 % Example:
 %   Consider one signal y = x and another signal y2 = x.^2. 
@@ -41,8 +39,9 @@ function [micv1,micv2,V1,V2, mi, I, Inorm, cca_out, optim_out] =  micanon(X,Y,va
 %   Y           Second set of multivariate data N x p2
 %
 %   Optional inputs as parameter/value pairs
-%   'xstart'            Starting point for optimization algorithm. Input 
-%                       A vector [a0;b0] of size p1+p2 to specify starting point
+%   'x0'                Starting point for optimization algorithm. Input 
+%                       a vector [a0;b0] of size p1+p2 to specify starting
+%                       point, or a matrix of size (p1+p2 x numcomp), or
 %                       'cca' to start at CCA optimum, or
 %                       'equal' to start with equally weighted variables (default)
 %   'presphere'         Sphere data prior to optimization (default=true)
@@ -95,15 +94,13 @@ function [micv1,micv2,V1,V2, mi, I, Inorm, cca_out, optim_out] =  micanon(X,Y,va
 %       .r                  Canonical correlations for CCA solution
 %
 % References
-%   Vestergaard, J. S., Nielsen, A. A., 
-%   Canonical Information Analysis (CIA)
-%   http://www.imm.dtu.dk/pubdb/p.php?6270
+% Vestergaard, Jacob Schack, and Allan Aasbjerg Nielsen. 
+% "Canonical information analysis." 
+% ISPRS Journal of Photogrammetry and Remote Sensing 101 (2015): 1-9.
+% http://dx.doi.org/10.1016/j.isprsjprs.2014.11.002
 
 % Jacob S. Vestergaard
 % jsve@imm.dtu.dk
-
-
-import cia.*;
 
 %% Initialize
 X = zscore(X);
@@ -178,7 +175,6 @@ for p=1:args.numcomp
                    'fastentropy', args.fastentropy, ...
                    'usegradient', args.usegradient, ...
                    'entropy', args.entropy};
-    
     %% Initialize as CCA optimum if empty start criterion
     if strcmpi(args.x0, 'cca')
         % Will initialize as CCA optimum
@@ -187,8 +183,10 @@ for p=1:args.numcomp
     elseif strcmpi(args.x0,'equal')
         xstart = [sqrt(nvar)/nvar*ones(1,nvar), ...
                         sqrt(nvar2)/nvar2*ones(1,nvar2)]';
-    else
-        xstart = args.x0;
+    elseif isvector(args.x0)
+        xstart = args.x0(:);
+    elseif ismatrix(args.x0)
+        xstart = args.x0(:,p);
     end
 
     %% Convert start values to spherical coordinates if chosen
